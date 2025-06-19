@@ -1,7 +1,6 @@
 use std::fmt::{Debug, Formatter, Result};
 use std::iter::FusedIterator;
 
-use crate::dim::Dims;
 use crate::expr::expression::Expression;
 use crate::shape::Shape;
 
@@ -26,9 +25,9 @@ impl<E: Expression> Iter<E> {
         let mut outer_limit = Default::default();
 
         if outer_rank > 0 {
-            outer_index = Dims::new(expr.rank());
-            outer_limit =
-                expr.shape().with_dims(|dims| TryFrom::try_from(dims).expect("invalid rank"));
+            let shape = expr.shape();
+            outer_limit = shape.with_dims(|dims| TryFrom::try_from(dims).expect("invalid rank"));
+            outer_index = shape.new_dims();
         }
 
         Self { expr, inner_index, inner_limit, outer_index, outer_limit }

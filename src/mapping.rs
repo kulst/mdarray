@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 
-use crate::dim::Dims;
 use crate::layout::{Dense, Layout, Strided};
 use crate::shape::{DynRank, Shape};
 
@@ -252,7 +251,9 @@ impl<S: Shape> StridedMapping<S> {
 
 impl<S: Shape> Default for StridedMapping<S> {
     fn default() -> Self {
-        Self { shape: S::default(), strides: S::Dims::new(S::default().rank()) }
+        let shape = S::default();
+        let strides = shape.new_dims();
+        Self { shape, strides }
     }
 }
 
@@ -335,7 +336,7 @@ impl<S: Shape> Mapping for StridedMapping<S> {
         assert!(index_mask == !(usize::MAX << mapping.rank()), "invalid permutation");
 
         let mut shape = S::new(mapping.rank());
-        let mut strides = S::Dims::new(mapping.rank());
+        let mut strides = shape.new_dims();
 
         shape.with_mut_dims(|dims| {
             // Calculate inverse permutation
@@ -356,26 +357,27 @@ impl<S: Shape> Mapping for StridedMapping<S> {
     }
 
     fn prepend_dim<M: Mapping>(mapping: &M, size: usize, stride: isize) -> Self {
-        let mut strides = S::Dims::new(mapping.rank() + 1);
+        let shape: S = mapping.shape().prepend_dim(size);
+        let mut strides = shape.new_dims();
 
         strides.as_mut()[0] = stride;
         mapping.for_each_stride(|i, stride| strides.as_mut()[i + 1] = stride);
 
-        Self { shape: mapping.shape().prepend_dim(size), strides }
+        Self { shape, strides }
     }
 
     fn remap<M: Mapping>(mapping: &M) -> Self {
-        let mut strides = S::Dims::new(mapping.rank());
-
+        let shape: S = mapping.shape().with_dims(Shape::from_dims);
+        let mut strides = shape.new_dims();
         mapping.for_each_stride(|i, stride| strides.as_mut()[i] = stride);
 
-        Self { shape: mapping.shape().with_dims(Shape::from_dims), strides }
+        Self { shape, strides }
     }
 
     fn remove_dim<M: Mapping>(mapping: &M, index: usize) -> Self {
         assert!(index < mapping.rank(), "invalid dimension");
-
-        let mut strides = S::Dims::new(mapping.rank() - 1);
+        let shape: S = mapping.shape().remove_dim(index);
+        let mut strides = shape.new_dims();
 
         mapping.for_each_stride(|i, stride| {
             if i < index {
@@ -385,12 +387,12 @@ impl<S: Shape> Mapping for StridedMapping<S> {
             }
         });
 
-        Self { shape: mapping.shape().remove_dim(index), strides }
+        Self { shape, strides }
     }
 
     fn reshape<R: Shape>(&self, new_shape: R) -> StridedMapping<R> {
         let new_shape = self.shape.reshape(new_shape);
-        let mut new_strides = R::Dims::new(new_shape.rank());
+        let mut new_strides = new_shape.new_dims();
 
         let mut old_len = 1usize;
         let mut new_len = 1usize;
@@ -445,11 +447,12 @@ impl<S: Shape> Mapping for StridedMapping<S> {
     }
 
     fn resize_dim<M: Mapping>(mapping: &M, index: usize, new_size: usize) -> Self {
-        let mut strides = S::Dims::new(mapping.rank());
+        let shape: S = mapping.shape().resize_dim(index, new_size);
+        let mut strides = shape.new_dims();
 
         mapping.for_each_stride(|i, stride| strides.as_mut()[i] = stride);
 
-        Self { shape: mapping.shape().resize_dim(index, new_size), strides }
+        Self { shape, strides }
     }
 
     fn shape_mut(&mut self) -> &mut S {
@@ -457,10 +460,11 @@ impl<S: Shape> Mapping for StridedMapping<S> {
     }
 
     fn transpose<M: Mapping<Shape: Shape<Reverse = S>>>(mapping: &M) -> Self {
-        let mut strides = S::Dims::new(mapping.rank());
+        let shape = mapping.shape().reverse();
+        let mut strides = shape.new_dims();
 
         mapping.for_each_stride(|i, stride| strides.as_mut()[mapping.rank() - 1 - i] = stride);
 
-        Self { shape: mapping.shape().reverse(), strides }
+        Self { shape, strides }
     }
 }

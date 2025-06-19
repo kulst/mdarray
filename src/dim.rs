@@ -40,7 +40,8 @@ pub trait Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>:
     + Sync
     + for<'a> TryFrom<&'a [T], Error: Debug>
 {
-    fn new(len: usize) -> Self;
+    type Len;
+    fn new(len: Self::Len) -> Self;
 }
 
 /// Type-level constant.
@@ -92,9 +93,8 @@ macro_rules! impl_dims {
     ($($n:tt),+) => {
         $(
             impl<T: Copy + Debug + Default + Eq + Hash + Send + Sync> Dims<T> for [T; $n] {
-                fn new(len: usize) -> Self {
-                    assert!(len == $n, "invalid length");
-
+                type Len = ();
+                fn new(_len : ()) -> Self {
                     Self::default()
                 }
             }
@@ -105,6 +105,7 @@ macro_rules! impl_dims {
 impl_dims!(0, 1, 2, 3, 4, 5, 6);
 
 impl<T: Copy + Debug + Default + Eq + Hash + Send + Sync> Dims<T> for Box<[T]> {
+    type Len = usize;
     fn new(len: usize) -> Self {
         vec![T::default(); len].into()
     }

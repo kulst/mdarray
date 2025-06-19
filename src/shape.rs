@@ -39,6 +39,9 @@ pub trait Shape: Clone + Debug + Default + Hash + Ord + Send + Sync {
     #[doc(hidden)]
     type Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>: Dims<T>;
 
+    #[doc(hidden)]
+    fn new_dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>(&self) -> Self::Dims<T>;
+
     /// Array rank if known statically, or `None` if dynamic.
     const RANK: Option<usize>;
 
@@ -305,6 +308,9 @@ impl Shape for DynRank {
 
     type Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync> = Box<[T]>;
 
+    fn new_dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>(&self) -> Self::Dims<T> {
+        Self::Dims::new(self.rank())
+    }
     const RANK: Option<usize> = None;
 
     fn new(rank: usize) -> Self {
@@ -345,6 +351,9 @@ impl Shape for () {
 
     type Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync> = [T; 0];
 
+    fn new_dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>(&self) -> Self::Dims<T> {
+        Self::Dims::new(())
+    }
     const RANK: Option<usize> = Some(0);
 
     fn new(rank: usize) {
@@ -375,6 +384,9 @@ impl<X: Dim> Shape for (X,) {
 
     type Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync> = [T; 1];
 
+    fn new_dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>(&self) -> Self::Dims<T> {
+        Self::Dims::new(())
+    }
     const RANK: Option<usize> = Some(1);
 
     fn new(rank: usize) -> Self {
@@ -428,6 +440,10 @@ macro_rules! impl_shape {
             type Owned<T> = X::Owned<T, Self::Tail>;
 
             type Dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync> = [T; $n];
+
+            fn new_dims<T: Copy + Debug + Default + Eq + Hash + Send + Sync>(&self) -> Self::Dims<T> {
+                Self::Dims::new(())
+            }
 
             const RANK: Option<usize> = Some($n);
 
