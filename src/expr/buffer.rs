@@ -1,7 +1,7 @@
 #[cfg(feature = "nightly")]
-use std::alloc::{Allocator, Global};
-use std::mem::ManuallyDrop;
-use std::ptr;
+use core::alloc::{Allocator, Global};
+use core::mem::ManuallyDrop;
+use core::ptr;
 
 #[cfg(not(feature = "nightly"))]
 use crate::alloc::{Allocator, Global};

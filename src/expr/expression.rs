@@ -5,6 +5,8 @@ use std::alloc::Allocator;
 use crate::alloc::Allocator;
 use crate::expr::adapters::{Cloned, Copied, Enumerate, Map, Zip};
 use crate::expr::iter::Iter;
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use crate::shape::Shape;
 use crate::tensor::Tensor;
 use crate::traits::IntoCloned;

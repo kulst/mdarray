@@ -1,8 +1,10 @@
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 #[cfg(feature = "nightly")]
-use std::alloc::Allocator;
-use std::marker::PhantomData;
-use std::mem::{self, ManuallyDrop};
-use std::ptr;
+use core::alloc::Allocator;
+use core::marker::PhantomData;
+use core::mem::{self, ManuallyDrop};
+use core::ptr;
 
 #[cfg(not(feature = "nightly"))]
 use crate::alloc::Allocator;

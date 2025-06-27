@@ -1,11 +1,13 @@
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 #[cfg(feature = "nightly")]
-use std::alloc::Allocator;
-use std::fmt::{Debug, Formatter, Result};
-use std::hash::{Hash, Hasher};
-use std::marker::PhantomData;
-use std::mem;
-use std::ops::{Index, IndexMut};
-use std::ptr::NonNull;
+use core::alloc::Allocator;
+use core::fmt::{Debug, Formatter, Result};
+use core::hash::{Hash, Hasher};
+use core::marker::PhantomData;
+use core::mem;
+use core::ops::{Index, IndexMut};
+use core::ptr::NonNull;
 
 use crate::array::Array;
 use crate::dim::{Const, Dim, Dyn};
