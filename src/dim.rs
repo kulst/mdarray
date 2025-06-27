@@ -1,5 +1,7 @@
-use std::fmt::{self, Debug, Formatter};
-use std::hash::Hash;
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
+use core::fmt::{self, Debug, Formatter};
+use core::hash::Hash;
 
 use crate::shape::Shape;
 use crate::tensor::Tensor;

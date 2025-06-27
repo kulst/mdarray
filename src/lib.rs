@@ -145,6 +145,7 @@
 //! assert_eq!(c, view![[4.0, 5.0], [5.0, 7.0], [6.0, 9.0]]);
 //! ```
 
+#![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::needless_range_loop)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
@@ -157,6 +158,16 @@
 #![warn(unreachable_pub)]
 #![warn(unused_results)]
 
+#[cfg(not(feature = "std"))]
+extern crate alloc as alloc_crate;
+#[cfg(not(feature = "std"))]
+pub(crate) mod prelude {
+    pub(crate) use alloc_crate::borrow::ToOwned;
+    pub(crate) use alloc_crate::boxed::Box;
+    pub(crate) use alloc_crate::collections::TryReserveError;
+    pub(crate) use alloc_crate::vec;
+    pub(crate) use alloc_crate::vec::Vec;
+}
 pub mod expr;
 pub mod index;
 
@@ -176,7 +187,6 @@ mod view;
 
 #[cfg(feature = "serde")]
 mod serde;
-
 #[cfg(not(feature = "nightly"))]
 mod alloc {
     pub trait Allocator {}

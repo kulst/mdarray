@@ -1,5 +1,5 @@
-use std::fmt::Debug;
-use std::hash::Hash;
+use core::fmt::Debug;
+use core::hash::Hash;
 
 use crate::layout::{Dense, Layout, Strided};
 use crate::shape::{DynRank, Shape};

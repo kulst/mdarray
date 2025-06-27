@@ -1,12 +1,16 @@
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 #[cfg(feature = "nightly")]
-use std::alloc::{Allocator, Global};
-use std::borrow::{Borrow, BorrowMut};
+use core::alloc::{Allocator, Global};
+use core::borrow::{Borrow, BorrowMut};
+use core::fmt::{self, Debug, Formatter};
+use core::hash::{Hash, Hasher};
+use core::mem::{self, ManuallyDrop, MaybeUninit};
+use core::ops::{Deref, DerefMut, Index, IndexMut, RangeBounds};
+use core::{ptr, slice};
+
+#[cfg(feature = "std")]
 use std::collections::TryReserveError;
-use std::fmt::{self, Debug, Formatter};
-use std::hash::{Hash, Hasher};
-use std::mem::{self, ManuallyDrop, MaybeUninit};
-use std::ops::{Deref, DerefMut, Index, IndexMut, RangeBounds};
-use std::{ptr, slice};
 
 #[cfg(not(feature = "nightly"))]
 use crate::alloc::{Allocator, Global};
