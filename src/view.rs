@@ -258,6 +258,13 @@ macro_rules! impl_view {
                 Self { slice, phantom: PhantomData }
             }
 
+            /// Decompose the view into its raw parts
+            pub fn into_raw_parts($($mut)? self) -> (*$raw_mut T, L::Mapping<S>) {
+                let ptr = self.$as_ptr();
+                let mapping = self.mapping().clone();
+                (ptr, mapping)
+            }
+
             pub(crate) unsafe fn axis_at<A: Axis>(
                 ptr: *$raw_mut T,
                 mapping: &L::Mapping<S>,
